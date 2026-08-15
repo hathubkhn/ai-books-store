@@ -98,7 +98,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                   <span className="text-foreground-secondary">Subtotal</span>
                   <span>{formatVND(Number(order.subtotal))}</span>
                 </div>
-                {order.discountAmount > 0 && (
+                {Number(order.discountAmount) > 0 && (
                   <div className="flex justify-between text-sm text-success">
                     <span>Discount ({order.discountPercent}%)</span>
                     <span>-{formatVND(Number(order.discountAmount))}</span>

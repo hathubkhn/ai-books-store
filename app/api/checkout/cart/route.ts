@@ -65,7 +65,13 @@ export async function POST(request: NextRequest) {
 
     // Calculate totals
     let subtotal = 0;
-    const orderItems = [];
+    const orderItems: Array<{
+      bookId: number;
+      bookTitle: string;
+      unitPrice: any;
+      quantity: number;
+      lineTotal: number;
+    }> = [];
 
     for (const item of cartItems) {
       if (!item.book.isActive) {
@@ -94,13 +100,8 @@ export async function POST(request: NextRequest) {
       firstBook.id
     );
 
-    let discountPercent = 0;
-    let promotionType = null;
-
-    if (promotion.eligible) {
-      discountPercent = promotion.discountPercent;
-      promotionType = promotion.type;
-    }
+    const discountPercent = promotion.discountPercent || 0;
+    const promotionType = promotion.promotionType || null;
 
     const discountAmount = Math.round((subtotal * discountPercent) / 100);
     const total = subtotal - discountAmount;

@@ -115,7 +115,8 @@ export async function POST(request: NextRequest) {
           discountAmount,
           total,
           promotionType: promotion.promotionType,
-          status: "PENDING",
+          status: "PENDING_PAYMENT",
+          paymentMethod: "bank_transfer",
           items: {
             create: {
               bookId: book.id,

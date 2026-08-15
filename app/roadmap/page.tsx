@@ -47,7 +47,17 @@ export default async function RoadmapHubPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {tracks.map((track) => (
-                <RoadmapTrackCard key={track.id} track={track} />
+                <RoadmapTrackCard 
+                  key={track.id} 
+                  track={{
+                    slug: track.slug,
+                    name: track.name,
+                    description: track.description,
+                    icon: track.icon || undefined,
+                    level: track.level || undefined,
+                    _count: track._count
+                  }} 
+                />
               ))}
             </div>
           </div>
