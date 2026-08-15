@@ -34,12 +34,6 @@ export const translations = {
     "computer-vision": "Computer Vision",
     "data-algorithms": "Dữ liệu & Thuật toán",
     
-    // Homepage
-    heroTitle: "AI không chỉ dành cho kỹ sư.",
-    heroSubtitle: "Một thư viện được tuyển chọn để mang trí tuệ nhân tạo đến người học từ tiểu học và trung học đến sinh viên đại học, nhà phát triển và kỹ sư AI.",
-    exploreBooks: "Khám phá sách",
-    viewNewReleases: "Xem sách mới",
-    
     // Early Buyer
     earlyBuyerTitle: "50 Độc giả Đầu tiên",
     earlyBuyerSubtitle: "Nhận giảm giá 10% cho mỗi cuốn sách",
@@ -49,7 +43,6 @@ export const translations = {
     orderNow: "Đặt hàng ngay",
     
     // Book
-    viewBook: "Xem sách",
     authors: "Tác giả",
     publisher: "Nhà xuất bản",
     year: "Năm",
@@ -117,12 +110,6 @@ export const translations = {
     "computer-vision": "Computer Vision",
     "data-algorithms": "Data & Algorithms",
     
-    // Homepage
-    heroTitle: "AI is not only for engineers.",
-    heroSubtitle: "A curated library designed to bring artificial intelligence to learners from primary school and secondary school to university students, developers, and AI engineers.",
-    exploreBooks: "Explore Books",
-    viewNewReleases: "View New Releases",
-    
     // Early Buyer
     earlyBuyerTitle: "First 50 Readers",
     earlyBuyerSubtitle: "Get 10% off per book",
@@ -132,7 +119,6 @@ export const translations = {
     orderNow: "Order Now",
     
     // Book
-    viewBook: "View Book",
     authors: "Authors",
     publisher: "Publisher",
     year: "Year",

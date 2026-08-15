@@ -47,28 +47,21 @@ export async function getCustomerPromotion(
   if (isNewCustomer && bookId) {
     // New customer - check if they qualify for early buyer discount for this book
     // Count unique customers who have ordered this book
-    const uniqueCustomersForBook = await prisma.orderItem.groupBy({
-      by: ['bookId'],
+    const ordersWithBook = await prisma.order.findMany({
       where: {
-        bookId: bookId,
+        items: {
+          some: {
+            bookId: bookId,
+          },
+        },
       },
-      _count: {
-        bookId: true,
+      select: {
+        customerId: true,
       },
+      distinct: ['customerId'],
     });
 
-    const bookOrderCount = uniqueCustomersForBook.length > 0 
-      ? await prisma.order.count({
-          where: {
-            items: {
-              some: {
-                bookId: bookId,
-              },
-            },
-          },
-          distinct: ['customerId'],
-        })
-      : 0;
+    const bookOrderCount = ordersWithBook.length;
     
     if (bookOrderCount < siteConfig.earlyBuyerLimit) {
       isEarlyBuyer = true;

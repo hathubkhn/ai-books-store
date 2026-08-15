@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import BookGrid from "@/components/books/BookGrid";
 import { Search } from "lucide-react";
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") || "";
   
@@ -100,5 +100,30 @@ export default function SearchPage() {
       </main>
       <Footer />
     </>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={
+      <>
+        <Header />
+        <main className="section-padding min-h-screen">
+          <div className="container-custom">
+            <div className="max-w-3xl mx-auto mb-12">
+              <h1 className="font-serif text-4xl md:text-5xl font-semibold mb-8">
+                Search Books
+              </h1>
+              <div className="text-center py-12">
+                <p className="text-foreground-secondary">Loading...</p>
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </>
+    }>
+      <SearchContent />
+    </Suspense>
   );
 }
