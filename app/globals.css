@@ -1,26 +1,65 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 bg-accent text-white rounded-sm font-medium transition-all duration-200 hover:bg-accent-hover hover:-translate-y-px active:translate-y-0;
+  }
+  
+  .btn-secondary {
+    @apply px-6 py-3 bg-surface text-foreground border border-border rounded-sm font-medium transition-all duration-200 hover:bg-surface-light hover:border-foreground-secondary;
+  }
+  
+  .btn-ghost {
+    @apply px-4 py-2 text-foreground hover:bg-surface rounded-sm transition-colors duration-200;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 bg-surface-light border border-border rounded-sm text-foreground placeholder:text-foreground-secondary/50 focus:outline-none focus:border-accent transition-colors;
+  }
+  
+  .textarea-field {
+    @apply w-full px-4 py-3 bg-surface-light border border-border rounded-sm text-foreground placeholder:text-foreground-secondary/50 focus:outline-none focus:border-accent transition-colors resize-none;
+  }
+  
+  .card {
+    @apply bg-surface-light border border-border rounded-sm p-6;
+  }
+  
+  .section-padding {
+    @apply py-16 md:py-24 lg:py-32;
+  }
+  
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .editorial-number {
+    @apply font-serif text-4xl md:text-5xl text-accent opacity-40 mb-4;
+  }
+  
+  .book-cover-hover {
+    @apply transition-transform duration-300 hover:-translate-y-1;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
 }

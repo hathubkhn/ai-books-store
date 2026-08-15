@@ -1,0 +1,334 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String   @unique
+  description String
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  
+  books       Book[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([slug])
+  @@index([sortOrder])
+}
+
+model Book {
+  id               Int      @id @default(autoincrement())
+  title            String
+  slug             String   @unique
+  
+  publisher        String
+  authors          String
+  
+  shortDescription String
+  fullDescription  String   @db.Text
+  
+  coverImage       String
+  price            Decimal  @db.Decimal(12, 0)
+  
+  isbn             String?
+  publishedYear    Int?
+  audience         String?
+  
+  // Translation info
+  translationSource String?  // e.g., "Tsinghua University", "Stanford", etc.
+  originalTitle     String?  // Original book title if translated
+  
+  featured         Boolean  @default(false)
+  isActive         Boolean  @default(true)
+  
+  categoryId       Int
+  category         Category @relation(fields: [categoryId], references: [id])
+  
+  orderItems       OrderItem[]
+  cartItems        CartItem[]
+  stageMappings    BookStageMapping[]
+  bundleItems      BookBundleItem[]
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  @@index([categoryId])
+  @@index([slug])
+  @@index([title])
+}
+
+model Customer {
+  id             Int      @id @default(autoincrement())
+  
+  fullName       String
+  phone          String   @unique
+  password       String?  // Hashed password for login
+  
+  defaultAddress String?
+  province       String?
+  
+  orders         Order[]
+  cartItems      CartItem[]
+  roadmapProgress CustomerRoadmapProgress[]
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  @@index([phone])
+}
+
+model CartItem {
+  id         Int      @id @default(autoincrement())
+  
+  customerId Int
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  bookId     Int
+  book       Book     @relation(fields: [bookId], references: [id])
+  
+  quantity   Int      @default(1)
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  @@unique([customerId, bookId]) // One book per customer in cart
+  @@index([customerId])
+  @@index([bookId])
+}
+
+model Order {
+  id               Int            @id @default(autoincrement())
+  orderCode        String         @unique
+  
+  customerId       Int
+  customer         Customer       @relation(fields: [customerId], references: [id])
+  
+  recipientName       String
+  phone               String
+  shippingAddress     String
+  alternativeAddress  String?
+  province            String?
+  note                String?
+  
+  subtotal         Decimal        @db.Decimal(12, 0)
+  discountPercent  Int            @default(0)
+  discountAmount   Decimal        @db.Decimal(12, 0)
+  total            Decimal        @db.Decimal(12, 0)
+  
+  promotionType    PromotionType?
+  
+  status           OrderStatus @default(PENDING_PAYMENT)
+  
+  // Payment tracking
+  paymentMethod    String?  @default("bank_transfer")
+  paymentProof     String?
+  paymentConfirmedAt DateTime?
+  paymentConfirmedBy String?
+  
+  items            OrderItem[]
+  
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  
+  @@index([customerId])
+  @@index([phone])
+  @@index([orderCode])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id         Int     @id @default(autoincrement())
+  
+  orderId    Int
+  order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  bookId     Int
+  book       Book    @relation(fields: [bookId], references: [id])
+  
+  bookTitle  String
+  unitPrice  Decimal @db.Decimal(12, 0)
+  
+  quantity   Int
+  lineTotal  Decimal @db.Decimal(12, 0)
+  
+  @@index([orderId])
+  @@index([bookId])
+}
+
+enum PromotionType {
+  EARLY_BUYER_10
+  RETURNING_CUSTOMER_10
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT  // Đợi chuyển khoản
+  PAYMENT_CONFIRMED // Admin đã xác nhận thanh toán
+  CONFIRMED
+  PACKING
+  SHIPPING
+  COMPLETED
+  CANCELLED
+}
+
+// ============================================
+// LEARNING ROADMAP MODELS
+// ============================================
+
+model LearningTrack {
+  id          Int      @id @default(autoincrement())
+  slug        String   @unique
+  name        String
+  nameEn      String?
+  description String   @db.Text
+  descriptionEn String? @db.Text
+  icon        String?  // lucide-react icon name
+  level       String?  // BEGINNER, INTERMEDIATE, ADVANCED
+  displayOrder Int     @default(0)
+  isActive    Boolean  @default(true)
+  
+  stages      LearningStage[]
+  bundles     BookBundle[]
+  progress    CustomerRoadmapProgress[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([slug])
+  @@index([displayOrder])
+}
+
+model LearningStage {
+  id              Int      @id @default(autoincrement())
+  trackId         Int
+  track           LearningTrack @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  
+  slug            String
+  title           String
+  titleEn         String?
+  description     String   @db.Text
+  descriptionEn   String?  @db.Text
+  
+  level           String   // FOUNDATION, BEGINNER, INTERMEDIATE, ADVANCED
+  displayOrder    Int
+  isOptional      Boolean  @default(false)
+  
+  // Prerequisites (JSON array of stage IDs)
+  prerequisiteStageIds Int[]
+  
+  bookMappings    BookStageMapping[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([trackId, slug])
+  @@index([trackId])
+  @@index([displayOrder])
+}
+
+model BookStageMapping {
+  id                    Int      @id @default(autoincrement())
+  
+  bookId                Int
+  book                  Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  
+  stageId               Int
+  stage                 LearningStage @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  
+  recommendationPriority Int     @default(0) // Higher = show first
+  recommendationReason  String?  @db.Text
+  recommendationReasonEn String? @db.Text
+  
+  minimumLevel          String?  // FOUNDATION, BEGINNER, etc.
+  maximumLevel          String?  // Don't show if user is too advanced
+  
+  isPrimary             Boolean  @default(true)
+  
+  // Alternative book IDs if this is out of stock
+  alternativeBookIds    Int[]
+  
+  createdAt             DateTime @default(now())
+  
+  @@unique([bookId, stageId])
+  @@index([stageId, recommendationPriority])
+}
+
+model BookBundle {
+  id              Int      @id @default(autoincrement())
+  slug            String   @unique
+  
+  trackId         Int?
+  track           LearningTrack? @relation(fields: [trackId], references: [id])
+  
+  title           String
+  titleEn         String?
+  description     String   @db.Text
+  descriptionEn   String?  @db.Text
+  
+  level           String   // STARTER, PRACTITIONER, ADVANCED
+  
+  // Discount
+  discountType    String   // PERCENTAGE, FIXED_AMOUNT
+  discountValue   Decimal  @db.Decimal(12, 0)
+  
+  isActive        Boolean  @default(true)
+  displayOrder    Int      @default(0)
+  
+  items           BookBundleItem[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([trackId])
+  @@index([slug])
+  @@index([level])
+}
+
+model BookBundleItem {
+  id              Int      @id @default(autoincrement())
+  
+  bundleId        Int
+  bundle          BookBundle @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  
+  bookId          Int
+  book            Book       @relation(fields: [bookId], references: [id])
+  
+  isRequired      Boolean  @default(true)
+  displayOrder    Int      @default(0)
+  
+  createdAt       DateTime @default(now())
+  
+  @@unique([bundleId, bookId])
+  @@index([bundleId])
+}
+
+model CustomerRoadmapProgress {
+  id                  Int      @id @default(autoincrement())
+  
+  customerId          Int
+  customer            Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  
+  trackId             Int
+  track               LearningTrack @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  
+  currentStageId      Int?
+  completedStageIds   Int[]     // JSON array
+  ownedBookIds        Int[]     // Books user already has
+  
+  assessmentData      Json?     // Store quiz answers
+  recommendedLevel    String?   // BEGINNER, INTERMEDIATE, etc.
+  
+  lastAccessedAt      DateTime  @default(now())
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  
+  @@unique([customerId, trackId])
+  @@index([customerId])
+}
